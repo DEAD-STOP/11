@@ -44,12 +44,6 @@ app.get('/api/notes', (req, res) => {
 });
 
 app.post('/api/notes', (req, res) => {
-    // route to db
-    // req will contain:
-    /* {
-            title:
-            text:
-        } */ 
     console.info(`${req.method} request for db`);
     let { title, text } = req.body;
     if (title && text) {
@@ -60,14 +54,28 @@ app.post('/api/notes', (req, res) => {
             id: uuid(),
           };
           readAndAppend(newNote, './db/db.json');
-          res.json(``);
+        //   res.json(``);
     } else {
         console.error("Something's missing.")
     }
 });
 
+const readAndDelete = (file, id) => {
+    fs.readFile(file, 'utf8', (err, data) => {
+      if (err) {
+        console.error(err);
+      } else {
+        const parseData = JSON.parse(data);
+        parseData.splice(parseData.find(obj => obj.id === id), 1);
+        writeToFile(file, parseData);
+      }
+    });
+  };
+
 app.delete('/api/notes/:id', (req, res) => {
-    res.json(id);
+    let { id }= req.params;
+    console.log(`ID is ${id}`);
+    return readAndDelete('./db/db.json', id);
 });
 
 app.listen(PORT, () => {
